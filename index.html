@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Void</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%2310a37f' d='M50 4C53 34 66 47 96 50C66 53 53 66 50 96C47 66 34 53 4 50C34 47 47 34 50 4Z'/%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#212121;--side:#171717;--panel:#2f2f2f;--text:#ececec;--mute:#9b9b9b;--line:#3a3a3a;--acc:#10a37f;--logo:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%2310a37f' d='M50 4C53 34 66 47 96 50C66 53 53 66 50 96C47 66 34 53 4 50C34 47 47 34 50 4Z'/%3E%3C/svg%3E")}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+.logo{width:64px;height:64px;background:var(--logo) center/contain no-repeat;filter:drop-shadow(0 0 14px rgba(16,163,127,.55))}
+#login{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px}
+#login h1{margin:0;letter-spacing:2px}#login p{color:var(--mute);margin:0;max-width:340px}
+.big{background:#fff;color:#222;border:1px solid #ccc;border-radius:24px;padding:11px 22px;font-weight:600}
+#app{display:none;height:100%}
+#side{width:260px;background:var(--side);display:flex;flex-direction:column;padding:10px;flex-shrink:0}
+.sb{border:1px solid var(--line);background:none;border-radius:10px;padding:10px 12px;text-align:left;margin-bottom:8px}.sb:hover,.item:hover{background:var(--panel)}
+#list{flex:1;overflow-y:auto;margin:6px 0}
+.item{display:flex;gap:6px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:14px}.item.on{background:var(--panel)}
+.item span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.item b{opacity:0;color:var(--mute);font-weight:400}.item:hover b{opacity:1}
+#who{font-size:13px;color:var(--mute);border-top:1px solid var(--line);padding-top:10px;cursor:pointer}
+#main{flex:1;display:flex;flex-direction:column;min-width:0}
+#top{display:flex;align-items:center;gap:10px;padding:10px 16px;font-weight:600}#top .logo{width:22px;height:22px;filter:none}
+#menu{display:none;background:none;border:0;font-size:20px}
+#msgs{flex:1;overflow-y:auto;padding:0 16px}.wrap{max-width:760px;margin:0 auto}
+.msg{display:flex;gap:12px;padding:14px 0}.av{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:var(--logo) center/60% no-repeat,#000;border:1.5px solid var(--acc)}
+.body{flex:1;min-width:0;overflow-wrap:anywhere}.body p{margin:0 0 10px}
+.msg.user{justify-content:flex-end}.msg.user .av{display:none}.msg.user .body{flex:0 1 auto;background:var(--panel);padding:8px 14px;border-radius:16px;white-space:pre-wrap}
+pre{background:#0d0d0d;color:#e6e6e6;border-radius:10px;overflow-x:auto;margin:8px 0}
+pre .hd{display:flex;justify-content:space-between;background:#2b2b2b;color:#bbb;font-size:12px;padding:5px 12px;border-radius:10px 10px 0 0}pre .hd button{background:none;border:0;color:#bbb;font-size:12px}
+pre code{display:block;padding:12px;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre}
+code.i{background:var(--panel);padding:1px 6px;border-radius:5px;font:13px ui-monospace,monospace}
+.img img{max-width:100%;background:#fff;border-radius:10px;display:block}.ib{display:flex;gap:8px;margin:6px 0}.ib button{background:var(--panel);border:0;border-radius:6px;padding:4px 10px;font-size:12px}
+.hero{text-align:center;margin-top:18vh;color:var(--mute)}.hero .logo{margin:0 auto 14px}.hero h2{color:var(--text);margin:0 0 6px}
+#bar{padding:8px 16px 14px}#box{max-width:760px;margin:0 auto;display:flex;align-items:flex-end;gap:8px;background:var(--panel);border-radius:24px;padding:8px 8px 8px 18px}
+#in{flex:1;background:none;border:0;outline:0;color:var(--text);font:inherit;resize:none;max-height:200px;padding:6px 0}
+#send{width:34px;height:34px;border-radius:50%;border:0;background:var(--text);color:var(--bg)}#send:disabled{opacity:.3}
+.note{text-align:center;font-size:12px;color:var(--mute);margin-top:8px}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10;align-items:center;justify-content:center;padding:16px}
+#modal .card{background:var(--bg);border:1px solid var(--line);border-radius:14px;width:100%;max-width:600px;max-height:80vh;overflow:auto;padding:16px}
+.row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}.row .n{flex:1;min-width:0}.row small{color:var(--mute);display:block}
+select,input{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px}
+@media(max-width:720px){#side{position:fixed;inset:0 auto 0 0;z-index:5;transform:translateX(-100%);transition:.2s}#side.open{transform:none}#menu{display:block}}
+</style></head><body>
+<div id="login"><div class="logo"></div><h1>VOID</h1><p id="lmsg">A coding-focused AI assistant. Sign in to save and revisit your chats.</p>
+<input id="em" type="email" placeholder="Email" autocomplete="email" style="width:260px"><input id="dn" maxlength="30" placeholder="Display name" autocomplete="nickname" style="width:260px"><button class="big" id="go">Email me a sign-in link</button></div>
+<div id="app">
+<aside id="side"><button class="sb" id="newbtn">+ New chat</button><div id="list"></div>
+<button class="sb" id="adminbtn" style="display:none">Members &amp; roles</button><div id="who" title="Click to change what Void calls you"></div></aside>
+<section id="main"><div id="top"><button id="menu">☰</button><span class="logo"></span><span>Void</span></div>
+<div id="msgs"><div class="wrap" id="thread"></div></div>
+<div id="bar"><div id="box"><textarea id="in" rows="1" placeholder="Message Void"></textarea><button id="send" disabled>↑</button></div>
+<div class="note">Void can search the web, but can still make mistakes. Check important facts and code.</div></div></section></div>
+<div id="modal"><div class="card"></div></div>
+<script>
+(function(){
+ const button=document.getElementById('go');
+ const message=document.getElementById('lmsg');
+ message.setAttribute('role','status');
+ message.setAttribute('aria-live','polite');
+ button.type='button';
+ button.addEventListener('click',async function(){
+  message.textContent='Checking sign-in…';
+  const email=document.getElementById('em').value.trim();
+  const name=document.getElementById('dn').value.trim();
+  if(!email || !document.getElementById('em').checkValidity()){
+   message.textContent='Enter a valid email address.';return;
+  }
+  if(!name){message.textContent='Enter a display name.';return;}
+  if(location.protocol!=='https:' && location.protocol!=='http:'){
+   message.textContent='Open your hosted website, rather than the downloaded HTML or a preview, to send a sign-in link.';return;
+  }
+  button.disabled=true;
+  let timer;
+  try{
+   if(typeof sb==='undefined' || !sb){
+    throw new Error(typeof setupErr!=='undefined' && setupErr ? setupErr : 'Sign-in did not initialize. The page script or Supabase library may have failed to load.');
+   }
+   message.textContent='Sending your sign-in link…';
+   const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('The sign-in request did not finish within 20 seconds. It may still send an email. Check your inbox before retrying.')),20000);});
+   const result=await Promise.race([sb.auth.signInWithOtp({email,options:{data:{full_name:name},emailRedirectTo:location.origin+location.pathname}}),timeout]);
+   if(result.error)throw result.error;
+   message.textContent='Link requested. Check your inbox and spam folder, then open the sign-in link.';
+  }catch(error){
+   message.textContent="Couldn't send the link: "+(error.message||String(error));
+  }finally{clearTimeout(timer);button.disabled=false;}
+ });
+})();
+</script>
+<script>
+const showErr=m=>{const e=document.getElementById("lmsg");if(e)e.textContent="Error: "+m};
+addEventListener("error",e=>showErr(e.message));addEventListener("unhandledrejection",e=>showErr((e.reason&&e.reason.message)||e.reason));
+const SUPABASE_URL="https://otgbijpibjxswwphjdaa.supabase.co",SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90Z2JpanBpYmp4c3d3cGhqZGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzgwODgsImV4cCI6MjEwODYxNDA4OH0.JDcomKws3MQWllfhz-tbKsbo5vn1-i7x1BBPYkvhYog";
+const $=id=>document.getElementById(id),say=t=>{$("lmsg").textContent=t};
+let sb=null,setupErr="";
+if(typeof supabase==="undefined")setupErr="Couldn't load the sign-in library. Open this page from your GitHub Pages link (not inside Claude) and check your internet connection.";
+else if(SUPABASE_URL.startsWith("PASTE")||SUPABASE_ANON_KEY.startsWith("PASTE"))setupErr="Setup isn't finished: put your Supabase URL and anon key at the top of the script in index.html.";
+else if(location.protocol==="file:")setupErr="Open this from your GitHub Pages link. Use the hosted site so the email link can return to it.";
+else try{sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)}catch(e){setupErr="Your Supabase URL or key looks wrong: "+e.message}
+const ROLES=["member","pro","admin","co-owner","blocked"];
+let me=null,prof=null,chats=[],cur=null,busy=false;
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+function img(raw){const sv=raw.replace(/<svg(?![^>]*xmlns)/,'<svg xmlns="http://www.w3.org/2000/svg"');return'<div class="img"><img alt="Generated image" src="data:image/svg+xml;charset=utf-8,'+encodeURIComponent(sv)+'"><div class="ib"><button onclick="dl(this,0)">Download SVG</button><button onclick="dl(this,1)">Download PNG</button></div></div>'}
+function txt(t){return t.split("```").map((p,i)=>{
+ if(i%2){const nl=p.indexOf("\n");return`<pre><div class="hd"><span>${esc(p.slice(0,nl).trim()||"code")}</span><button onclick="cp(this)">Copy</button></div><code>${esc(p.slice(nl+1).replace(/\n$/,""))}</code></pre>`}
+ return esc(p).split(/\n{2,}/).map(b=>{b=b.replace(/`([^`\n]+)`/g,'<code class="i">$1</code>').replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>");
+  if(/^#{1,4} /.test(b))return"<p><b>"+b.replace(/^#+ /,"")+"</b></p>";return b.trim()?"<p>"+b.replace(/\n/g,"<br>")+"</p>":""}).join("")}).join("")}
+function md(t){t=t.replace(/```(?:svg|xml|html)?[ \t]*\n?\s*(<svg[\s\S]*?<\/svg>)\s*```/gi,"\n\n$1\n\n");return t.split(/(<svg[\s\S]*?<\/svg>)/).map((c,i)=>i%2?img(c):txt(c)).join("")}
+function cp(b){navigator.clipboard.writeText(b.closest("pre").querySelector("code").textContent);b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1200)}
+function dl(b,png){const i=b.closest(".img").querySelector("img"),save=(bl,n)=>{const a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download=n;a.click()};
+ if(!png)return save(new Blob([decodeURIComponent(i.src.split(",").slice(1).join(","))],{type:"image/svg+xml"}),"void-image.svg");
+ const w=1024,h=Math.round(w*(i.naturalHeight||1)/(i.naturalWidth||1)),c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(i,0,0,w,h);c.toBlob(bl=>bl&&save(bl,"void-image.png"))}
+const nm=()=>prof.nick||prof.name||"friend",isAdmin=()=>["owner","co-owner","admin"].includes(prof.role);
+const label=()=>nm()+(prof.role!=="member"?" · "+prof.role:"");
+function render(){const L=$("list");L.innerHTML="";
+ chats.forEach(c=>{const d=document.createElement("div");d.className="item"+(cur&&cur.id===c.id?" on":"");const s=document.createElement("span");s.textContent=c.title;const x=document.createElement("b");x.textContent="✕";
+  x.onclick=async e=>{e.stopPropagation();await sb.from("chats").delete().eq("id",c.id);chats=chats.filter(k=>k.id!==c.id);if(cur&&cur.id===c.id)cur=null;render()};
+  d.onclick=()=>{cur=c;render();$("side").classList.remove("open")};d.append(s,x);L.append(d)});
+ $("thread").innerHTML=!cur||!cur.messages.length?'<div class="hero"><div class="logo"></div><h2>What are we building?</h2><div>Ask about code, bugs, current events, or anything else.</div></div>'
+  :cur.messages.map(m=>m.role==="user"?`<div class="msg user"><div class="body">${esc(m.content)}</div></div>`:`<div class="msg ai"><div class="av"></div><div class="body">${md(m.content)}</div></div>`).join("");
+ $("msgs").scrollTop=$("msgs").scrollHeight}
+async function send(){const v=$("in").value.trim();if(!v||busy)return;
+ if(!cur){cur={id:crypto.randomUUID(),title:v.slice(0,40),messages:[]};chats.unshift(cur)}
+ cur.messages.push({role:"user",content:v});const ai={role:"assistant",content:"Thinking…"};cur.messages.push(ai);
+ $("in").value="";$("in").style.height="auto";busy=true;$("send").disabled=true;render();
+ const {data,error}=await sb.functions.invoke("chat",{body:{messages:cur.messages.slice(0,-1)}});
+ ai.content=error||!data?"Sorry, something went wrong. Please try again.":data.text||data.error||"No reply.";
+ busy=false;render();await sb.from("chats").upsert({id:cur.id,title:cur.title,messages:cur.messages.map(m=>({role:m.role,content:m.content})),updated:new Date().toISOString()})}
+function modal(h){$("modal").firstElementChild.innerHTML=h;$("modal").style.display="flex"}
+function nickDlg(){modal('<h3 style="margin:0 0 10px">What should Void call you?</h3><input id="nk" maxlength="30" style="width:100%"><div style="margin-top:12px;text-align:right"><button class="big" id="nks">Save</button></div>');$("nk").value=nm();
+ $("nks").onclick=async()=>{const n=$("nk").value.trim();if(!n)return;prof.nick=n;await sb.from("profiles").update({nick:n}).eq("id",me.id);$("who").textContent=label();$("modal").style.display="none"}}
+async function adminDlg(){modal('<h3 style="margin:0 0 10px">Members &amp; roles</h3><div id="ml">Loading…</div>');
+ const {data}=await sb.from("profiles").select("*").order("joined",{ascending:false});$("ml").innerHTML="";
+ (data||[]).forEach(p=>{const r=document.createElement("div");r.className="row";const n=document.createElement("div");n.className="n";n.textContent=p.nick||p.name||"Unknown";
+  const s=document.createElement("small");s.textContent=(p.email||"")+" · joined "+new Date(p.joined).toLocaleDateString();n.append(s);r.append(n);
+  if(p.role==="owner"){const t=document.createElement("span");t.textContent="owner";r.append(t)}
+  else{const sel=document.createElement("select");ROLES.forEach(x=>{const o=document.createElement("option");o.value=o.textContent=x;sel.append(o)});sel.value=p.role;
+   sel.onchange=async()=>{const {error}=await sb.from("profiles").update({role:sel.value}).eq("id",p.id);sel.style.outline=error?"2px solid #d33":""};r.append(sel)}
+  $("ml").append(r)})}
+async function boot(session){
+ if(!session){$("login").style.display="flex";$("app").style.display="none";return}
+ me=session.user;let {data}=await sb.from("profiles").select("*").eq("id",me.id).single();
+ if(!data){await new Promise(r=>setTimeout(r,800));({data}=await sb.from("profiles").select("*").eq("id",me.id).single())}
+ prof=data;if(!prof){$("lmsg").textContent="Couldn't load your profile. Run schema.sql, then reload.";return}
+ if(prof.role==="blocked"){$("lmsg").textContent="Your access to Void has been disabled by an administrator.";["go","em","dn"].forEach(i=>$(i).style.display="none");return}
+ $("who").textContent=label();$("adminbtn").style.display=isAdmin()?"block":"none";
+ const r=await sb.from("chats").select("*").order("updated",{ascending:false});chats=r.data||[];
+ $("login").style.display="none";$("app").style.display="flex";render()}
+$("adminbtn").onclick=adminDlg;$("who").onclick=nickDlg;$("modal").onclick=e=>{if(e.target.id==="modal")$("modal").style.display="none"};
+$("newbtn").onclick=()=>{cur=null;render();$("side").classList.remove("open")};$("menu").onclick=()=>$("side").classList.toggle("open");
+$("send").onclick=send;
+$("in").addEventListener("input",e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";$("send").disabled=!e.target.value.trim()||busy});
+$("in").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}});
+if(sb)sb.auth.getSession().then(({data,error})=>{if(error)throw error;return boot(data.session)}).catch(e=>say("Session error: "+e.message));else say(setupErr);
+</script></body></html>
